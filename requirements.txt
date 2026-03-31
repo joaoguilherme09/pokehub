@@ -1,4 +1,13 @@
+#bibliotecas que precisam ser instaladas e as suas funcionalidades:
+
+# Framework web
 fastapi==0.111.0
+
+# Servidor para rodar o FastAPI
 uvicorn==0.29.0
+
+# Faz requisições para a PokéAPI
 requests==2.31.0
+
+# Renderiza os arquivos HTML
 jinja2==3.1.4
