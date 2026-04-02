@@ -3,47 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pokédex - API</title>
+  <title>Pokédex</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --red: #cc0000; --red2: #e53935;
-      --w: #fff; --g1: #f7f7f7; --g2: #ebebeb;
-      --g4: #aaa; --g6: #666; --g8: #222;
-      --bd: #e0e0e0; --radius: 10px;
+      --red:#cc0000; --red2:#e53935; --w:#fff;
+      --g1:#f7f7f7; --g2:#ebebeb; --g4:#aaa; --g6:#666; --g8:#222;
+      --bd:#e0e0e0; --r:10px;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Outfit', sans-serif; background: var(--g1); color: var(--g8); min-height: 100vh; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Outfit',sans-serif; background:var(--g1); color:var(--g8); min-height:100vh; }
 
-    nav { background: var(--red); padding: 0 2rem; height: 52px; display: flex; align-items: center; gap: .75rem; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
-    .ball { width: 22px; height: 22px; border-radius: 50%; background: #fff; position: relative; }
+    /* NAV */
+    nav { background:var(--red); padding:0 2rem; height:52px; display:flex; align-items:center; gap:.75rem; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+    .ball { width:22px; height:22px; border-radius:50%; background:#fff; position:relative; flex-shrink:0; }
     .ball::after { content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:7px; height:7px; background:var(--red); border-radius:50%; border:1.5px solid rgba(255,255,255,.5); }
-    nav span { font-size: 1.05rem; font-weight: 700; color: #fff; }
+    nav span { font-size:1.05rem; font-weight:700; color:#fff; }
 
-    main { max-width: 600px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+    main { max-width:680px; margin:0 auto; padding:2rem 1.25rem 4rem; }
 
-    .hero { text-align: center; margin-bottom: 1.75rem; }
-    .hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: .3rem; }
-    .hero p { font-size: .9rem; color: var(--g4); }
+    /* HERO */
+    .hero { text-align:center; margin-bottom:1.5rem; }
+    .hero h1 { font-size:1.5rem; font-weight:700; margin-bottom:.3rem; }
+    .hero p { font-size:.9rem; color:var(--g4); }
 
-    .search { background: var(--w); border: 1.5px solid var(--bd); border-radius: var(--radius); display: flex; align-items: center; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); transition: border-color .2s, box-shadow .2s; }
-    .search:focus-within { border-color: var(--red); box-shadow: 0 0 0 3px rgba(204,0,0,.08); }
-    .search span { padding: 0 .85rem; color: var(--g4); user-select: none; }
+    /* BUSCA */
+    .search { background:var(--w); border:1.5px solid var(--bd); border-radius:var(--r); display:flex; align-items:center; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.08); transition:border-color .2s,box-shadow .2s; }
+    .search:focus-within { border-color:var(--red); box-shadow:0 0 0 3px rgba(204,0,0,.08); }
+    .search span { padding:0 .85rem; color:var(--g4); user-select:none; }
     .search input { flex:1; border:none; outline:none; font-family:'Outfit',sans-serif; font-size:.95rem; padding:.72rem 0; background:transparent; color:var(--g8); }
-    .search input::placeholder { color: var(--g4); }
+    .search input::placeholder { color:var(--g4); }
     .search button { background:var(--red); color:#fff; border:none; font-family:'Outfit',sans-serif; font-size:.88rem; font-weight:600; padding:0 1.3rem; height:42px; cursor:pointer; transition:background .15s; }
-    .search button:hover { background: var(--red2); }
-    .hint { font-size: .76rem; color: var(--g4); margin-top: .45rem; text-align: center; }
+    .search button:hover { background:var(--red2); }
+    .hint { font-size:.76rem; color:var(--g4); margin-top:.45rem; text-align:center; }
 
+    /* FILTROS */
+    .filtros-toggle { display:flex; align-items:center; gap:.5rem; margin-top:1.25rem; cursor:pointer; user-select:none; font-size:.88rem; font-weight:600; color:var(--red); }
+    .filtros-toggle span { font-size:.75rem; transition:transform .2s; }
+    .filtros-toggle.aberto span { transform:rotate(180deg); }
+
+    .filtros-box { display:none; background:var(--w); border:1.5px solid var(--bd); border-radius:var(--r); padding:1.2rem; margin-top:.6rem; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .filtros-box.aberto { display:block; animation:up .2s ease both; }
+
+    .filtro-grupo { margin-bottom:1rem; }
+    .filtro-grupo:last-child { margin-bottom:0; }
+    .filtro-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--g4); margin-bottom:.5rem; }
+
+    .chips { display:flex; flex-wrap:wrap; gap:.4rem; }
+    .chip { font-size:.75rem; font-weight:600; padding:4px 12px; border-radius:20px; border:1.5px solid var(--bd); background:var(--w); color:var(--g6); cursor:pointer; transition:all .15s; text-transform:capitalize; }
+    .chip:hover { border-color:var(--red); color:var(--red); }
+    .chip.ativo { background:var(--red); color:#fff; border-color:var(--red); }
+
+    .btn-filtrar { margin-top:1rem; width:100%; background:var(--red); color:#fff; border:none; font-family:'Outfit',sans-serif; font-size:.88rem; font-weight:600; padding:.65rem; border-radius:8px; cursor:pointer; transition:background .15s; }
+    .btn-filtrar:hover { background:var(--red2); }
+
+    /* LOADING / ERRO */
     #loading { display:none; text-align:center; padding:3rem 0; color:var(--g4); font-size:.88rem; }
     .spinner { width:28px; height:28px; border:3px solid var(--g2); border-top-color:var(--red); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto .6rem; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #error { display:none; background:#fff5f5; border:1.5px solid #ffcdd2; border-radius:var(--r); padding:1rem 1.25rem; margin-top:1.25rem; font-size:.88rem; color:var(--red); }
 
-    #error { display:none; background:#fff5f5; border:1.5px solid #ffcdd2; border-radius:var(--radius); padding:1rem 1.25rem; margin-top:1.25rem; font-size:.88rem; color:var(--red); }
-
-    #card { display:none; background:var(--w); border:1.5px solid var(--bd); border-radius:var(--radius); margin-top:1.5rem; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,.10); animation:up .25s ease both; }
-    @keyframes up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-
+    /* CARD INDIVIDUAL */
+    #card { display:none; background:var(--w); border:1.5px solid var(--bd); border-radius:var(--r); margin-top:1.5rem; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,.10); animation:up .25s ease both; }
     .top { padding:1.4rem 1.5rem; display:flex; align-items:center; gap:1.2rem; background:var(--red); }
     .sprite { width:88px; height:88px; background:rgba(255,255,255,.2); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .sprite img { width:76px; height:76px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
@@ -52,44 +73,75 @@
     .nome { font-size:1.4rem; font-weight:700; color:#fff; text-transform:capitalize; margin-bottom:.45rem; }
     .tipos { display:flex; gap:.35rem; flex-wrap:wrap; }
     .tipo { font-size:.7rem; font-weight:600; padding:2px 11px; border-radius:20px; background:rgba(255,255,255,.22); color:#fff; text-transform:capitalize; border:1.5px solid rgba(255,255,255,.35); }
-
     .body { padding:1.2rem 1.5rem; }
     .medidas { display:flex; gap:.75rem; margin-bottom:1.2rem; }
     .med { flex:1; background:var(--g1); border-radius:8px; padding:.65rem; text-align:center; border:1px solid var(--bd); }
     .med b { display:block; font-size:.95rem; color:var(--g8); }
     .med small { font-size:.7rem; color:var(--g4); }
-
     .sec { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--g4); margin-bottom:.7rem; }
     .stat { display:flex; align-items:center; gap:.7rem; margin-bottom:.45rem; }
     .stat span { font-size:.78rem; color:var(--g6); width:95px; flex-shrink:0; }
     .bar-bg { flex:1; height:5px; background:var(--g2); border-radius:3px; overflow:hidden; }
     .bar { height:100%; border-radius:3px; width:0; transition:width .8s cubic-bezier(.4,0,.2,1); }
     .stat em { font-size:.78rem; font-weight:600; color:var(--g6); width:26px; text-align:right; font-style:normal; }
+
+    /* LISTA DE FILTRO */
+    #lista { display:none; margin-top:1.5rem; animation:up .25s ease both; }
+    .lista-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .lista-titulo { font-size:1rem; font-weight:700; color:var(--g8); text-transform:capitalize; }
+    .lista-total { font-size:.8rem; color:var(--g4); }
+    .grade { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:.75rem; }
+    .poke-card { background:var(--w); border:1.5px solid var(--bd); border-radius:var(--r); padding:.75rem; text-align:center; cursor:pointer; transition:all .15s; }
+    .poke-card:hover { border-color:var(--red); transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.1); }
+    .poke-card img { width:64px; height:64px; object-fit:contain; image-rendering:pixelated; }
+    .poke-card p { font-size:.78rem; font-weight:600; text-transform:capitalize; color:var(--g8); margin-top:.3rem; }
+    .poke-card small { font-size:.68rem; color:var(--g4); }
+
+    @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
   </style>
 </head>
 <body>
 
 <nav>
   <div class="ball"></div>
-  <span>Pokédex - Desenvolvida por João Guilherme</span>
+  <span>Pokédex</span>
 </nav>
 
 <main>
   <div class="hero">
     <h1>Encontre seu Pokémon</h1>
-    <p>Busque pelo nome ou número da Pokédex</p>
+    <p>Busque pelo nome, número ou use os filtros</p>
   </div>
 
+  <!-- Busca -->
   <div class="search">
     <span>🔍</span>
-    <input id="inp" type="text" placeholder="Ex: Nome do pokemon ou o número dele na pokédex" autocomplete="off" />
+    <input id="inp" type="text" placeholder="Ex: pikachu ou 25" autocomplete="off" />
     <button onclick="buscar()">Buscar</button>
   </div>
   <div class="hint">Pressione Enter para buscar</div>
 
+  <!-- Filtros -->
+  <div class="filtros-toggle" onclick="toggleFiltros()">
+    ⚙️ Filtros <span>▼</span>
+  </div>
+
+  <div class="filtros-box" id="filtros-box">
+    <div class="filtro-grupo">
+      <div class="filtro-label">Tipo</div>
+      <div class="chips" id="chips-tipo"></div>
+    </div>
+    <div class="filtro-grupo">
+      <div class="filtro-label">Geração</div>
+      <div class="chips" id="chips-gen"></div>
+    </div>
+    <button class="btn-filtrar" onclick="aplicarFiltro()">Aplicar filtro</button>
+  </div>
+
   <div id="loading"><div class="spinner"></div>Buscando...</div>
   <div id="error"></div>
 
+  <!-- Card individual -->
   <div id="card">
     <div class="top" id="top">
       <div class="sprite"><img id="img" src="" alt="" /></div>
@@ -108,25 +160,115 @@
       <div id="stats"></div>
     </div>
   </div>
+
+  <!-- Lista filtrada -->
+  <div id="lista">
+    <div class="lista-header">
+      <div class="lista-titulo" id="lista-titulo"></div>
+      <div class="lista-total" id="lista-total"></div>
+    </div>
+    <div class="grade" id="grade"></div>
+  </div>
 </main>
 
 <script>
-  const TIPOS = {
+  const TIPOS_CORES = {
     fire:'#f08030',water:'#6890f0',grass:'#78c850',electric:'#f0c000',
     psychic:'#f85888',ice:'#98d8d8',dragon:'#7038f8',dark:'#705848',
     fairy:'#ee99ac',normal:'#a8a878',fighting:'#c03028',flying:'#a890f0',
     poison:'#a040a0',ground:'#c8a820',rock:'#b8a038',bug:'#a8b820',
     ghost:'#705898',steel:'#b8b8d0'
   };
-  const STATS = { hp:'HP', attack:'Ataque', defense:'Defesa', 'special-attack':'Sp. Ataque', 'special-defense':'Sp. Defesa', speed:'Velocidade' };
-  const barCor = v => v>=100?'#4caf50':v>=70?'#8bc34a':v>=50?'#ffb300':v>=30?'#ff7043':'#e53935';
 
+  const TIPOS_NOMES = [
+    'normal','fire','water','grass','electric','ice','fighting','poison',
+    'ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'
+  ];
+
+  const GERACOES = [
+    {num:1,label:'Gen I — Kanto'},
+    {num:2,label:'Gen II — Johto'},
+    {num:3,label:'Gen III — Hoenn'},
+    {num:4,label:'Gen IV — Sinnoh'},
+    {num:5,label:'Gen V — Unova'},
+    {num:6,label:'Gen VI — Kalos'},
+    {num:7,label:'Gen VII — Alola'},
+    {num:8,label:'Gen VIII — Galar'},
+    {num:9,label:'Gen IX — Paldea'},
+  ];
+
+  const STATS = {hp:'HP',attack:'Ataque',defense:'Defesa','special-attack':'Sp. Ataque','special-defense':'Sp. Defesa',speed:'Velocidade'};
+  const barCor = v => v>=100?'#4caf50':v>=70?'#8bc34a':v>=50?'#ffb300':v>=30?'#ff7043':'#e53935';
   const el = id => document.getElementById(id);
 
-  function loading() { el('loading').style.display='block'; el('card').style.display='none'; el('error').style.display='none'; }
-  function erro(msg) { el('loading').style.display='none'; el('card').style.display='none'; el('error').style.display='block'; el('error').textContent='⚠️ '+msg; }
-  function mostrar() { el('loading').style.display='none'; el('error').style.display='none'; const c=el('card'); c.style.animation='none'; void c.offsetWidth; c.style.animation=''; c.style.display='block'; }
+  let tipoAtivo = null;
+  let genAtiva  = null;
 
+  // Monta chips de tipo
+  TIPOS_NOMES.forEach(t => {
+    const c = document.createElement('div');
+    c.className   = 'chip';
+    c.textContent = t;
+    c.dataset.val = t;
+    c.onclick = () => selecionarChip('tipo', t, c);
+    el('chips-tipo').appendChild(c);
+  });
+
+  // Monta chips de geração
+  GERACOES.forEach(g => {
+    const c = document.createElement('div');
+    c.className   = 'chip';
+    c.textContent = g.label;
+    c.dataset.val = g.num;
+    c.onclick = () => selecionarChip('gen', g.num, c);
+    el('chips-gen').appendChild(c);
+  });
+
+  function selecionarChip(grupo, val, el_chip) {
+    const container = grupo === 'tipo' ? el('chips-tipo') : el('chips-gen');
+    container.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
+    el_chip.classList.add('ativo');
+    if (grupo === 'tipo') tipoAtivo = val;
+    else genAtiva = val;
+  }
+
+  function toggleFiltros() {
+    const box    = el('filtros-box');
+    const toggle = document.querySelector('.filtros-toggle');
+    box.classList.toggle('aberto');
+    toggle.classList.toggle('aberto');
+  }
+
+  // Estados
+  function loading() {
+    el('loading').style.display = 'block';
+    el('card').style.display    = 'none';
+    el('lista').style.display   = 'none';
+    el('error').style.display   = 'none';
+  }
+  function erro(msg) {
+    el('loading').style.display = 'none';
+    el('error').style.display   = 'block';
+    el('error').textContent     = '⚠️ ' + msg;
+  }
+  function mostrarCard() {
+    el('loading').style.display = 'none';
+    el('error').style.display   = 'none';
+    el('lista').style.display   = 'none';
+    const c = el('card');
+    c.style.animation = 'none'; void c.offsetWidth; c.style.animation = '';
+    c.style.display = 'block';
+  }
+  function mostrarLista() {
+    el('loading').style.display = 'none';
+    el('error').style.display   = 'none';
+    el('card').style.display    = 'none';
+    const l = el('lista');
+    l.style.animation = 'none'; void l.offsetWidth; l.style.animation = '';
+    l.style.display = 'block';
+  }
+
+  // Busca individual
   async function buscar() {
     const q = el('inp').value.trim();
     if (!q) { el('inp').focus(); return; }
@@ -135,28 +277,100 @@
       const res  = await fetch(`/pokemon/${encodeURIComponent(q.toLowerCase())}`);
       const data = await res.json();
       if (!res.ok) { erro(data.detail || 'Pokémon não encontrado.'); return; }
+      preencherCard(data);
+      mostrarCard();
+    } catch(e) { erro('Não foi possível conectar ao servidor.'); }
+  }
 
-      el('nome').textContent  = data.name.charAt(0).toUpperCase() + data.name.slice(1);
-      el('num').textContent   = '#' + String(data.id).padStart(3,'0');
-      el('img').src           = data.image || '';
-      el('altura').textContent = data.height + ' m';
-      el('peso').textContent   = data.weight + ' kg';
-      el('top').style.background = TIPOS[data.types[0]] || '#cc0000';
+  // Preenche o card individual
+  function preencherCard(data) {
+    el('nome').textContent  = data.name.charAt(0).toUpperCase() + data.name.slice(1);
+    el('num').textContent   = '#' + String(data.id).padStart(3,'0');
+    el('img').src           = data.image || '';
+    el('altura').textContent = data.height + ' m';
+    el('peso').textContent   = data.weight + ' kg';
+    el('top').style.background = TIPOS_CORES[data.types[0]] || '#cc0000';
 
-      el('tipos').innerHTML = '';
-      data.types.forEach(t => { const b=document.createElement('span'); b.className='tipo'; b.textContent=t; el('tipos').appendChild(b); });
+    el('tipos').innerHTML = '';
+    data.types.forEach(t => {
+      const b = document.createElement('span');
+      b.className = 'tipo'; b.textContent = t;
+      el('tipos').appendChild(b);
+    });
 
-      el('stats').innerHTML = '';
-      Object.entries(data.stats).forEach(([s,v]) => {
-        const pct = Math.min((v/255)*100,100).toFixed(1);
-        const row = document.createElement('div');
-        row.className = 'stat';
-        row.innerHTML = `<span>${STATS[s]||s}</span><div class="bar-bg"><div class="bar" style="background:${barCor(v)}" data-w="${pct}%"></div></div><em>${v}</em>`;
-        el('stats').appendChild(row);
+    el('stats').innerHTML = '';
+    Object.entries(data.stats).forEach(([s,v]) => {
+      const pct = Math.min((v/255)*100,100).toFixed(1);
+      const row = document.createElement('div');
+      row.className = 'stat';
+      row.innerHTML = `<span>${STATS[s]||s}</span><div class="bar-bg"><div class="bar" style="background:${barCor(v)}" data-w="${pct}%"></div></div><em>${v}</em>`;
+      el('stats').appendChild(row);
+    });
+
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.bar').forEach(b => b.style.width = b.dataset.w);
+    });
+  }
+
+  // Aplica filtro
+ async function aplicarFiltro() {
+    if (!tipoAtivo && !genAtiva) {
+      alert('Selecione um tipo ou uma geração antes de filtrar.');
+      return;
+    }
+    loading();
+    try {
+      // Monta a URL com os parâmetros selecionados
+      const params = new URLSearchParams();
+      if (tipoAtivo) params.append('tipo', tipoAtivo);
+      if (genAtiva)  params.append('geracao', genAtiva);
+
+      // Monta o título
+      let titulo = '';
+      if (tipoAtivo && genAtiva) {
+        const gen = GERACOES.find(g => g.num == genAtiva);
+        titulo = `Tipo: ${tipoAtivo} — ${gen.label}`;
+      } else if (tipoAtivo) {
+        titulo = `Tipo: ${tipoAtivo}`;
+      } else {
+        titulo = GERACOES.find(g => g.num == genAtiva).label;
+      }
+
+      const res  = await fetch(`/filtro?${params.toString()}`);
+      const data = await res.json();
+      if (!res.ok) { erro(data.detail || 'Erro ao filtrar.'); return; }
+
+      el('lista-titulo').textContent = titulo;
+      el('lista-total').textContent  = `${data.total} Pokémon`;
+
+      const grade = el('grade');
+      grade.innerHTML = '';
+      mostrarLista();
+
+      data.pokemons.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'poke-card';
+
+        // Busca o ID na PokéAPI para montar o sprite
+        fetch(`/pokemon/${p.name}`)
+          .then(r => r.json())
+          .then(d => {
+            card.innerHTML = `
+              <img src="${d.image || ''}" alt="${p.name}" />
+              <p>${p.name}</p>
+              <small>#${String(d.id).padStart(3,'0')}</small>
+            `;
+          });
+
+        card.onclick = () => {
+          el('inp').value = p.name;
+          buscar();
+          window.scrollTo({top:0, behavior:'smooth'});
+        };
+
+        grade.appendChild(card);
       });
 
-      mostrar();
-      requestAnimationFrame(() => { document.querySelectorAll('.bar').forEach(b => b.style.width=b.dataset.w); });
     } catch(e) { erro('Não foi possível conectar ao servidor.'); }
   }
 
