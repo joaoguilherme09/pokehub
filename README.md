@@ -50,6 +50,9 @@ http://localhost:8000
 
 
 git rm -r --cached .vscode __pycache__
+
 git add .
+
 git commit -m "remove pastas desnecessarias"
+
 git push
