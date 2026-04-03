@@ -77,36 +77,52 @@ def filtrar_por_geracao(numero: int):
 @app.get("/filtro")
 def filtrar(tipo: str = None, geracao: int = None):
     try:
-        lista_tipo = set()
+        lista_tipo = {}
         lista_gen  = set()
 
         # Busca por tipo
         if tipo:
-            res  = requests.get(f"{POKEAPI_URL}/type/{tipo.lower()}", timeout=10)
+            res = requests.get(f"{POKEAPI_URL}/type/{tipo.lower()}", timeout=10)
             if res.status_code == 404:
                 raise HTTPException(status_code=404, detail=f"Tipo '{tipo}' não encontrado.")
             data = res.json()
             for p in data["pokemon"]:
-                lista_tipo.add(p["pokemon"]["name"])
+                nome = p["pokemon"]["name"]
+                url  = p["pokemon"]["url"]
+                # Extrai o ID direto da URL ex: .../pokemon/6/
+                id_pokemon = int(url.rstrip("/").split("/")[-1])
+                lista_tipo[nome] = id_pokemon
 
         # Busca por geração
         if geracao:
-            res  = requests.get(f"{POKEAPI_URL}/generation/{geracao}", timeout=10)
+            res = requests.get(f"{POKEAPI_URL}/generation/{geracao}", timeout=10)
             if res.status_code == 404:
                 raise HTTPException(status_code=404, detail=f"Geração {geracao} não encontrada.")
             data = res.json()
             for p in data["pokemon_species"]:
-                lista_gen.add(p["name"])
+                url = p["url"]
+                id_pokemon = int(url.rstrip("/").split("/")[-1])
+                lista_gen.add(id_pokemon)
 
-        # Cruza os dois filtros se ambos foram selecionados
+        # Cruza os filtros
         if tipo and geracao:
-            nomes = lista_tipo & lista_gen   # interseção — só os que estão nos dois
+            # Mantém só os que estão nos dois filtros
+            pokemons = [
+                {"name": nome, "id": id_p}
+                for nome, id_p in lista_tipo.items()
+                if id_p in lista_gen
+            ]
         elif tipo:
-            nomes = lista_tipo
+            pokemons = [{"name": nome, "id": id_p} for nome, id_p in lista_tipo.items()]
         else:
-            nomes = lista_gen
+            # Só geração — monta lista com os nomes da geração
+            pokemons = [
+                {"name": p["name"], "id": int(p["url"].rstrip("/").split("/")[-1])}
+                for p in data["pokemon_species"]
+            ]
 
-        pokemons = sorted([{"name": n} for n in nomes], key=lambda x: x["name"])
+        # Ordena pelo número da Pokédex
+        pokemons = sorted(pokemons, key=lambda x: x["id"])
 
         return {"total": len(pokemons), "pokemons": pokemons}
 

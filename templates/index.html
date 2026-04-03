@@ -351,16 +351,13 @@
         const card = document.createElement('div');
         card.className = 'poke-card';
 
-        // Busca o ID na PokéAPI para montar o sprite
-        fetch(`/pokemon/${p.name}`)
-          .then(r => r.json())
-          .then(d => {
-            card.innerHTML = `
-              <img src="${d.image || ''}" alt="${p.name}" />
-              <p>${p.name}</p>
-              <small>#${String(d.id).padStart(3,'0')}</small>
-            `;
-          });
+        const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
+
+        card.innerHTML = `
+          <img src="${spriteUrl}" alt="${p.name}" />
+          <p>${p.name}</p>
+          <small>#${String(p.id).padStart(3,'0')}</small>
+        `;
 
         card.onclick = () => {
           el('inp').value = p.name;
