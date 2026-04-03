@@ -49,7 +49,7 @@ http://localhost:8000
 
 
 
-git rm -r --cached .vscode __pycache_ _
+git rm -r --cached -f .vscode __pycache_
 
 git add .
 
