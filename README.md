@@ -17,6 +17,14 @@ Uma mini Pokédex web feita com FastAPI e Python, consumindo a [PokéAPI](https:
 
 ## 🚀 Como rodar
 
+
+**1. Acesse o link abaixo:**
+```
+https://pokedex-dkbp.onrender.com/
+```
+
+**ou**
+
 **1. Clone o repositório**
 ```bash
 git clone https://github.com/joaoguilherme09/Pokedex.git
@@ -45,6 +53,7 @@ uvicorn main:app --reload
 ```
 http://localhost:8000
 ```
+
 
 
 
