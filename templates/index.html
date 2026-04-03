@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pokédex</title>
+  <title>Pokédex - API</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -104,19 +104,19 @@
 
 <nav>
   <div class="ball"></div>
-  <span>Pokédex</span>
+  <span>Pokédex - Desenvolvido por <a href="https://github.com/joaoguilherme09" target="_blank" style="color:white;">João Guilherme</a></span>
 </nav>
 
 <main>
   <div class="hero">
     <h1>Encontre seu Pokémon</h1>
-    <p>Busque pelo nome, número ou use os filtros</p>
+    <p>Busque pelo nome, número ou use o filtro</p>
   </div>
 
   <!-- Busca -->
   <div class="search">
     <span>🔍</span>
-    <input id="inp" type="text" placeholder="Ex: pikachu ou 25" autocomplete="off" />
+    <input id="inp" type="text" placeholder="Ex: nome do pokemon ou o número do pokemon" autocomplete="off" />
     <button onclick="buscar()">Buscar</button>
   </div>
   <div class="hint">Pressione Enter para buscar</div>
@@ -201,7 +201,7 @@
   const barCor = v => v>=100?'#4caf50':v>=70?'#8bc34a':v>=50?'#ffb300':v>=30?'#ff7043':'#e53935';
   const el = id => document.getElementById(id);
 
-  let tipoAtivo = null;
+  let tipoAtivo = [];
   let genAtiva  = null;
 
   // Monta chips de tipo
@@ -225,12 +225,26 @@
   });
 
   function selecionarChip(grupo, val, el_chip) {
-    const container = grupo === 'tipo' ? el('chips-tipo') : el('chips-gen');
-    container.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
+  if (grupo === 'tipo') {
+    if (tipoAtivo.includes(val)) {
+      // Clicou num já ativo — remove
+      tipoAtivo = tipoAtivo.filter(t => t !== val);
+      el_chip.classList.remove('ativo');
+    } else {
+      // Só adiciona se tiver menos de 2 selecionados
+      if (tipoAtivo.length >= 2) {
+        alert('Selecione no máximo 2 tipos.');
+        return;
+      }
+      tipoAtivo.push(val);
+      el_chip.classList.add('ativo');
+    }
+  } else {
+    el('chips-gen').querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
     el_chip.classList.add('ativo');
-    if (grupo === 'tipo') tipoAtivo = val;
-    else genAtiva = val;
+    genAtiva = val;
   }
+}
 
   function toggleFiltros() {
     const box    = el('filtros-box');
@@ -313,63 +327,58 @@
   }
 
   // Aplica filtro
- async function aplicarFiltro() {
-    if (!tipoAtivo && !genAtiva) {
-      alert('Selecione um tipo ou uma geração antes de filtrar.');
-      return;
-    }
-    loading();
-    try {
-      // Monta a URL com os parâmetros selecionados
-      const params = new URLSearchParams();
-      if (tipoAtivo) params.append('tipo', tipoAtivo);
-      if (genAtiva)  params.append('geracao', genAtiva);
-
-      // Monta o título
-      let titulo = '';
-      if (tipoAtivo && genAtiva) {
-        const gen = GERACOES.find(g => g.num == genAtiva);
-        titulo = `Tipo: ${tipoAtivo} — ${gen.label}`;
-      } else if (tipoAtivo) {
-        titulo = `Tipo: ${tipoAtivo}`;
-      } else {
-        titulo = GERACOES.find(g => g.num == genAtiva).label;
-      }
-
-      const res  = await fetch(`/filtro?${params.toString()}`);
-      const data = await res.json();
-      if (!res.ok) { erro(data.detail || 'Erro ao filtrar.'); return; }
-
-      el('lista-titulo').textContent = titulo;
-      el('lista-total').textContent  = `${data.total} Pokémon`;
-
-      const grade = el('grade');
-      grade.innerHTML = '';
-      mostrarLista();
-
-      data.pokemons.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'poke-card';
-
-        const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
-
-        card.innerHTML = `
-          <img src="${spriteUrl}" alt="${p.name}" />
-          <p>${p.name}</p>
-          <small>#${String(p.id).padStart(3,'0')}</small>
-        `;
-
-        card.onclick = () => {
-          el('inp').value = p.name;
-          buscar();
-          window.scrollTo({top:0, behavior:'smooth'});
-        };
-
-        grade.appendChild(card);
-      });
-
-    } catch(e) { erro('Não foi possível conectar ao servidor.'); }
+async function aplicarFiltro() {
+  if (!tipoAtivo.length && !genAtiva) {
+    alert('Selecione um tipo ou uma geração antes de filtrar.');
+    return;
   }
+  loading();
+  try {
+    const params = new URLSearchParams();
+    if (tipoAtivo.length) params.append('tipo', tipoAtivo.join(','));
+    if (genAtiva)         params.append('geracao', genAtiva);
+
+    // Monta o título
+    let titulo = '';
+    if (tipoAtivo.length && genAtiva) {
+      const gen = GERACOES.find(g => g.num == genAtiva);
+      titulo = `Tipos: ${tipoAtivo.join(' + ')} — ${gen.label}`;
+    } else if (tipoAtivo.length) {
+      titulo = `Tipos: ${tipoAtivo.join(' + ')}`;
+    } else {
+      titulo = GERACOES.find(g => g.num == genAtiva).label;
+    }
+
+    const res  = await fetch(`/filtro?${params.toString()}`);
+    const data = await res.json();
+    if (!res.ok) { erro(data.detail || 'Erro ao filtrar.'); return; }
+
+    el('lista-titulo').textContent = titulo;
+    el('lista-total').textContent  = `${data.total} Pokémon`;
+
+    const grade = el('grade');
+    grade.innerHTML = '';
+    mostrarLista();
+
+    data.pokemons.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'poke-card';
+      const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
+      card.innerHTML = `
+        <img src="${spriteUrl}" alt="${p.name}" />
+        <p>${p.name}</p>
+        <small>#${String(p.id).padStart(3,'0')}</small>
+      `;
+      card.onclick = () => {
+        el('inp').value = p.name;
+        buscar();
+        window.scrollTo({top:0, behavior:'smooth'});
+      };
+      grade.appendChild(card);
+    });
+
+  } catch(e) { erro('Não foi possível conectar ao servidor.'); }
+}
 
   el('inp').addEventListener('keydown', e => { if(e.key==='Enter') buscar(); });
 </script>
