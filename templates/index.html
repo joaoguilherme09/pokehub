@@ -140,26 +140,37 @@
 
   <div id="loading"><div class="spinner"></div>Buscando...</div>
   <div id="error"></div>
-
-  <!-- Card individual -->
-  <div id="card">
-    <div class="top" id="top">
-      <div class="sprite"><img id="img" src="" alt="" /></div>
-      <div class="info">
-        <div class="num" id="num">#000</div>
-        <div class="nome" id="nome">---</div>
-        <div class="tipos" id="tipos"></div>
-      </div>
-    </div>
-    <div class="body">
-      <div class="medidas">
-        <div class="med"><b id="altura">-</b><small>Altura</small></div>
-        <div class="med"><b id="peso">-</b><small>Peso</small></div>
-      </div>
-      <div class="sec">Status base</div>
-      <div id="stats"></div>
+<!-- Card individual -->
+<div id="card">
+  <div class="top" id="top">
+    <div class="sprite"><img id="img" src="" alt="" /></div>
+    <div class="info">
+      <div class="num" id="num">#000</div>
+      <div class="nome" id="nome">---</div>
+      <div class="tipos" id="tipos"></div>
     </div>
   </div>
+  <div class="body">
+    <div class="medidas">
+      <div class="med"><b id="altura">-</b><small>Altura</small></div>
+      <div class="med"><b id="peso">-</b><small>Peso</small></div>
+    </div>
+    <div class="sec">Status base</div>
+    <div id="stats"></div>
+
+    <div class="sec" style="margin-top:1rem;">Fraquezas</div>
+    <div id="fraquezas" style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem;"></div>
+
+    <div class="sec">Resistências</div>
+    <div id="resistencias" style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem;"></div>
+
+    <div class="sec">Imunidades</div>
+    <div id="imunidades" style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem;"></div>
+
+    
+  </div>
+</div>
+
 
   <!-- Lista filtrada -->
   <div id="lista">
@@ -295,36 +306,67 @@
       mostrarCard();
     } catch(e) { erro('Não foi possível conectar ao servidor.'); }
   }
+// Preenche o card individual
+function preencherCard(data) {
+  el('nome').textContent  = data.name.charAt(0).toUpperCase() + data.name.slice(1);
+  el('num').textContent   = '#' + String(data.id).padStart(3,'0');
+  el('img').src           = data.image || '';
+  el('altura').textContent = data.height + ' m';
+  el('peso').textContent   = data.weight + ' kg';
+  el('top').style.background = TIPOS_CORES[data.types[0]] || '#cc0000';
 
-  // Preenche o card individual
-  function preencherCard(data) {
-    el('nome').textContent  = data.name.charAt(0).toUpperCase() + data.name.slice(1);
-    el('num').textContent   = '#' + String(data.id).padStart(3,'0');
-    el('img').src           = data.image || '';
-    el('altura').textContent = data.height + ' m';
-    el('peso').textContent   = data.weight + ' kg';
-    el('top').style.background = TIPOS_CORES[data.types[0]] || '#cc0000';
+  el('tipos').innerHTML = '';
+  data.types.forEach(t => {
+    const b = document.createElement('span');
+    b.className = 'tipo'; b.textContent = t;
+    el('tipos').appendChild(b);
+  });
 
-    el('tipos').innerHTML = '';
-    data.types.forEach(t => {
-      const b = document.createElement('span');
-      b.className = 'tipo'; b.textContent = t;
-      el('tipos').appendChild(b);
-    });
+  el('stats').innerHTML = '';
+  Object.entries(data.stats).forEach(([s,v]) => {
+    const pct = Math.min((v/255)*100,100).toFixed(1);
+    const row = document.createElement('div');
+    row.className = 'stat';
+    row.innerHTML = `<span>${STATS[s]||s}</span><div class="bar-bg"><div class="bar" style="background:${barCor(v)}" data-w="${pct}%"></div></div><em>${v}</em>`;
+    el('stats').appendChild(row);
+  });
 
-    el('stats').innerHTML = '';
-    Object.entries(data.stats).forEach(([s,v]) => {
-      const pct = Math.min((v/255)*100,100).toFixed(1);
-      const row = document.createElement('div');
-      row.className = 'stat';
-      row.innerHTML = `<span>${STATS[s]||s}</span><div class="bar-bg"><div class="bar" style="background:${barCor(v)}" data-w="${pct}%"></div></div><em>${v}</em>`;
-      el('stats').appendChild(row);
-    });
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar').forEach(b => b.style.width = b.dataset.w);
+  });
 
-    requestAnimationFrame(() => {
-      document.querySelectorAll('.bar').forEach(b => b.style.width = b.dataset.w);
-    });
-  }
+  // Fraquezas
+  el('fraquezas').innerHTML = '';
+  (data.fraquezas || []).forEach(t => {
+    const b = document.createElement('span');
+    b.className = 'tipo';
+    b.textContent = t;
+    b.style.background = TIPOS_CORES[t] || '#888';
+    el('fraquezas').appendChild(b);
+  });
+
+  // Resistências
+  el('resistencias').innerHTML = '';
+  (data.resistencias || []).forEach(t => {
+    const b = document.createElement('span');
+    b.className = 'tipo';
+    b.textContent = t;
+    b.style.background = TIPOS_CORES[t] || '#888';
+    el('resistencias').appendChild(b);
+  });
+
+  // Imunidades
+  el('imunidades').innerHTML = '';
+  (data.imunidades || []).forEach(t => {
+    const b = document.createElement('span');
+    b.className = 'tipo';
+    b.textContent = t;
+    b.style.background = TIPOS_CORES[t] || '#888';
+    el('imunidades').appendChild(b);
+  });
+
+
+}
 
   // Aplica filtro
 async function aplicarFiltro() {

@@ -34,6 +34,41 @@ def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+
+
+def buscar_relacoes_tipo(tipos: list):
+    dano_recebido = {}
+    
+    for tipo in tipos:
+        res = requests.get(f"{POKEAPI_URL}/type/{tipo}", timeout=10)
+        if res.status_code != 200:
+            continue
+        data     = res.json()
+        relacoes = data["damage_relations"]
+
+
+        # Dano recebido
+        for t in relacoes["double_damage_from"]:
+            nome = t["name"]
+            dano_recebido[nome] = dano_recebido.get(nome, 1) * 2
+
+        for t in relacoes["half_damage_from"]:
+            nome = t["name"]
+            dano_recebido[nome] = dano_recebido.get(nome, 1) * 0.5
+
+        for t in relacoes["no_damage_from"]:
+            nome = t["name"]
+            dano_recebido[nome] = 0
+
+
+
+    return {
+        "fraquezas":    [t for t, v in dano_recebido.items() if v > 1],
+        "resistencias": [t for t, v in dano_recebido.items() if 0 < v < 1],
+        "imunidades":   [t for t, v in dano_recebido.items() if v == 0],
+    }
+
+
 # ── Rota 2: Buscar um Pokémon por nome ou número
 @app.get("/pokemon/{name}")
 def get_pokemon(name: str):
@@ -63,15 +98,24 @@ def get_pokemon(name: str):
         data = response.json()
         # Converte a resposta da PokéAPI para dicionário Python
 
+        # Extrai os tipos do Pokémon
+        tipos = [t["type"]["name"] for t in data["types"]]
+
+        # Busca fraquezas, resistências e imunidades com base nos tipos
+        relacoes = buscar_relacoes_tipo(tipos)
+
         # Retorna apenas os dados que nos interessam, organizados em JSON
         return {
-            "id":     data["id"],  # ID = número na Pokédex
-            "name":   data["name"], # nome do pokemon
-            "height": data["height"] / 10, # altura do pokemon
-            "weight": data["weight"] / 10, # peso do pokemon
-            "image":  data["sprites"]["front_default"], # URL da imagem do Pokémon
-            "types":  [t["type"]["name"] for t in data["types"]],# lista dos tipos, ex: ["electric"]
-            "stats":  {s["stat"]["name"]: s["base_stat"] for s in data["stats"]},  # dicionário de status base
+            "id":           data["id"],                                             # ID = número na Pokédex
+            "name":         data["name"],                                           # nome do pokemon
+            "height":       data["height"] / 10,                                    # altura do pokemon
+            "weight":       data["weight"] / 10,                                    # peso do pokemon
+            "image":        data["sprites"]["front_default"],                       # URL da imagem do Pokémon
+            "types":        tipos,                                                  # lista dos tipos, ex: ["electric"]
+            "stats":        {s["stat"]["name"]: s["base_stat"] for s in data["stats"]},  # dicionário de status base
+            "fraquezas":    relacoes["fraquezas"],                                  # tipos que causam dano duplo
+            "resistencias": relacoes["resistencias"],                               # tipos que causam dano reduzido
+            "imunidades":   relacoes["imunidades"],                                 # tipos que não causam dano no pokemon
         }
 
     except requests.exceptions.Timeout:
@@ -81,8 +125,8 @@ def get_pokemon(name: str):
     except requests.exceptions.ConnectionError:
         # Sem internet ou a PokéAPI está fora do ar
         raise HTTPException(status_code=503, detail="Sem conexão com a PokéAPI.")
-
-
+    
+    
 # ── Rota 3: Filtrar por tipo 
 @app.get("/tipo/{tipo}")
 def filtrar_por_tipo(tipo: str):
@@ -234,3 +278,5 @@ def filtrar(tipo: str = None, geracao: int = None):
     except requests.exceptions.RequestException as e:
         # Qualquer erro de conexão cai aqui
         raise HTTPException(status_code=503, detail=str(e))
+    
+    
